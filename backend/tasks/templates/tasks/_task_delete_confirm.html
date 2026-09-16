@@ -1,0 +1,23 @@
+<div class="modal-overlay">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-head">
+      <h3>Delete "{{ task.title }}"?</h3>
+      <button type="button" class="modal-close" data-modal-close aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <p style="color:var(--ink-muted);font-size:13px;margin:0 0 20px;">This removes the task and everything attached to it — checklist, attachments, comments, history. This can't be undone.</p>
+    <div class="modal-footer" style="border-top:none;margin-top:0;padding-top:0;">
+      <span></span>
+      <div class="footer-actions">
+        <button type="button" class="btn-secondary" data-modal-close>Cancel</button>
+        <form method="post" action="{% url 'task_delete' task.id %}" style="margin:0;"
+              hx-post="{% url 'task_delete' task.id %}" hx-target="#modal-root" hx-swap="innerHTML">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ next }}">
+          <button type="submit" class="btn-primary" style="background:var(--danger);">Delete task</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

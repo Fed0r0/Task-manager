@@ -1,0 +1,41 @@
+<div class="modal-overlay">
+  <div class="modal" style="max-width:380px;">
+    <div class="modal-head">
+      <h3>Edit {{ person }}</h3>
+      <button type="button" class="modal-close" data-modal-close aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    {% if form.non_field_errors %}
+    <div class="auth-error">{{ form.non_field_errors|join:" " }}</div>
+    {% endif %}
+
+    <form method="post" action="{% url 'person_edit' person.id %}"
+          hx-post="{% url 'person_edit' person.id %}" hx-target="#modal-root" hx-swap="innerHTML">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+
+      <div class="person-photo-row">
+        <div class="avatar" style="width:56px;height:56px;font-size:20px;background:{{ avatar_color }};">{{ person.initial }}</div>
+      </div>
+
+      <div class="field">
+        <label for="{{ form.full_name.id_for_label }}">Full name</label>
+        {{ form.full_name }}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-danger-text"
+                hx-get="{% url 'person_remove' person.id %}?next={{ next|urlencode }}"
+                hx-target="#modal-root" hx-swap="innerHTML">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+          Remove from team
+        </button>
+        <div class="footer-actions">
+          <button type="button" class="btn-secondary" data-modal-close>Cancel</button>
+          <button type="submit" class="btn-primary">Save</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

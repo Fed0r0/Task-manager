@@ -1,0 +1,23 @@
+{% extends "tasks/base.html" %}
+{% block title %}Audit Log — Task Panel{% endblock %}
+{% block page_title %}Audit Log{% endblock %}
+{% block page_subtitle %}Every recorded change across every task{% endblock %}
+{% block content %}
+
+<div class="audit-list">
+  {% for h in entries %}
+  <div class="audit-row">
+    <div class="audit-main"><strong>{{ h.user|default:"—" }}</strong> {{ h.action }}</div>
+    <div class="audit-meta">
+      on
+      <button type="button" class="link-btn"
+              hx-get="{% url 'task_edit' h.task.id %}?next={{ request.get_full_path|urlencode }}"
+              hx-target="#modal-root" hx-swap="innerHTML">{{ h.task.title }}</button>
+      &middot; {{ h.at|date:"d M Y, H:i" }}
+    </div>
+  </div>
+  {% empty %}
+  <div class="empty-state"><div class="es-title">Nothing recorded yet</div>Changes to tasks will show up here.</div>
+  {% endfor %}
+</div>
+{% endblock %}

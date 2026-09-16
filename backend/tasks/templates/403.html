@@ -1,0 +1,11 @@
+{% extends "tasks/base.html" %}
+{% block title %}Access denied — Task Panel{% endblock %}
+{% block page_title %}Access denied{% endblock %}
+{% block page_subtitle %}{% endblock %}
+{% block content %}
+<div class="empty-state">
+  <div class="es-title">Admins only</div>
+  This page is only available to team members with the Admin role.
+  <div><a class="btn-primary" style="display:inline-flex;" href="{% url 'task_list' %}">Back to All tasks</a></div>
+</div>
+{% endblock %}

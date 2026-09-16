@@ -1,0 +1,116 @@
+{% extends "tasks/base.html" %}
+{% block title %}Statistics — Task Panel{% endblock %}
+{% block page_title %}Statistics{% endblock %}
+{% block page_subtitle %}A closer look at how work is distributed across the team{% endblock %}
+{% block content %}
+
+<div class="stat-row stat-row-5">
+  <div class="stat-tile"><div class="num">{{ total }}</div><div class="label">Total tasks</div></div>
+  <div class="stat-tile"><div class="num">{{ completed }}</div><div class="label">Completed</div></div>
+  <div class="stat-tile"><div class="num">{{ in_progress }}</div><div class="label">In progress</div></div>
+  <div class="stat-tile {% if overdue %}warn{% endif %}"><div class="num">{{ overdue }}</div><div class="label">Overdue</div></div>
+  <div class="stat-tile"><div class="num">{{ avg_progress }}%</div><div class="label">Avg. progress</div></div>
+</div>
+
+<div class="stats-grid">
+  <div class="chart-card">
+    <div class="chart-card-head"><h3>Tasks by status</h3></div>
+    {% if total %}
+    <div class="donut-wrap">
+      <svg viewBox="0 0 120 120" width="120" height="120">
+        <g transform="rotate(-90 60 60)">
+          {% for seg in status_segments %}
+          <circle cx="60" cy="60" r="46" fill="none" stroke="{{ seg.color }}" stroke-width="16"
+                  stroke-dasharray="{{ seg.dasharray }}" stroke-dashoffset="{{ seg.dashoffset }}"></circle>
+          {% endfor %}
+        </g>
+      </svg>
+      <div class="donut-legend">
+        {% for seg in status_segments %}
+        {% if seg.value %}
+        <div class="donut-legend-item">
+          <span class="legend-dot" style="background:{{ seg.color }}"></span>
+          <span class="dl-label">{{ seg.label }}</span>
+          <span class="dl-value">{{ seg.value }}</span>
+          <span class="dl-pct">{{ seg.pct }}%</span>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    {% else %}
+    <div class="empty-note">No tasks yet.</div>
+    {% endif %}
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-card-head"><h3>Tasks by priority</h3></div>
+    {% if total %}
+    <div class="donut-wrap">
+      <svg viewBox="0 0 120 120" width="120" height="120">
+        <g transform="rotate(-90 60 60)">
+          {% for seg in priority_segments %}
+          <circle cx="60" cy="60" r="46" fill="none" stroke="{{ seg.color }}" stroke-width="16"
+                  stroke-dasharray="{{ seg.dasharray }}" stroke-dashoffset="{{ seg.dashoffset }}"></circle>
+          {% endfor %}
+        </g>
+      </svg>
+      <div class="donut-legend">
+        {% for seg in priority_segments %}
+        {% if seg.value %}
+        <div class="donut-legend-item">
+          <span class="legend-dot" style="background:{{ seg.color }}"></span>
+          <span class="dl-label">{{ seg.label }}</span>
+          <span class="dl-value">{{ seg.value }}</span>
+          <span class="dl-pct">{{ seg.pct }}%</span>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+    {% else %}
+    <div class="empty-note">No tasks yet.</div>
+    {% endif %}
+  </div>
+
+  <div class="chart-card span-2">
+    <div class="chart-card-head">
+      <h3>Workload by team member</h3>
+      <span class="hint">Total tasks assigned</span>
+    </div>
+    {% if workload_rows %}
+    <div class="bar-chart-list">
+      {% for row in workload_rows %}
+      <div class="bar-row">
+        <div class="bar-label">{{ row.label }}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:{{ row.width_pct }}%;background:{{ row.color }};"></div></div>
+        <div class="bar-value">{{ row.value }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-note">No one on the team yet.</div>
+    {% endif %}
+  </div>
+
+  <div class="chart-card span-2">
+    <div class="chart-card-head">
+      <h3>Average progress by team member</h3>
+      <span class="hint">Mean completion across their tasks</span>
+    </div>
+    {% if progress_rows %}
+    <div class="bar-chart-list">
+      {% for row in progress_rows %}
+      <div class="bar-row">
+        <div class="bar-label">{{ row.label }}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:{{ row.width_pct }}%;background:{{ row.color }};"></div></div>
+        <div class="bar-value">{{ row.value }}%</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-note">No one on the team yet.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

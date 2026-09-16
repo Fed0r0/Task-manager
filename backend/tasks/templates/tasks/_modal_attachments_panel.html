@@ -1,0 +1,20 @@
+{% load task_extras %}
+<input type="file" name="file" id="attachment-file-input" multiple style="display:none;"
+       hx-post="{% url 'attachment_add' task.id %}" hx-trigger="change" hx-target="#attachments-panel"
+       hx-swap="innerHTML" hx-encoding="multipart/form-data">
+<label for="attachment-file-input" class="attachment-drop">Click to attach one or more files/documents</label>
+
+<div class="attachments-list">
+  {% for a in task.attachments.all %}
+  <div class="attachment-row">
+    <a href="{{ a.file.url }}" target="_blank" rel="noopener" class="attachment-name">{{ a.filename }}</a>
+    <span class="attachment-meta">{{ a.added_by|default:"—" }} &middot; {{ a.added_at|date:"M j, Y" }}</span>
+    <button type="button" class="icon-btn danger" title="Remove"
+            hx-post="{% url 'attachment_delete' task.id a.id %}" hx-target="#attachments-panel" hx-swap="innerHTML">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+    </button>
+  </div>
+  {% empty %}
+  <div class="empty-note">No files attached yet.</div>
+  {% endfor %}
+</div>

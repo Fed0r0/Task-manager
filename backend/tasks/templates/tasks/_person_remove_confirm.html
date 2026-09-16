@@ -1,0 +1,31 @@
+<div class="modal-overlay">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-head">
+      <h3>Remove "{{ person }}"?</h3>
+      <button type="button" class="modal-close" data-modal-close aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    {% if error %}
+    <div class="auth-error">{{ error }}</div>
+    {% else %}
+    <p style="color:var(--ink-muted);font-size:13px;margin:0 0 20px;">This removes their account and unassigns them from every task. This can't be undone.</p>
+    {% endif %}
+
+    <div class="modal-footer" style="border-top:none;margin-top:0;padding-top:0;">
+      <span></span>
+      <div class="footer-actions">
+        <button type="button" class="btn-secondary" data-modal-close>Cancel</button>
+        {% if not error %}
+        <form method="post" action="{% url 'person_remove' person.id %}" style="margin:0;"
+              hx-post="{% url 'person_remove' person.id %}" hx-target="#modal-root" hx-swap="innerHTML">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ next }}">
+          <button type="submit" class="btn-primary" style="background:var(--danger);">Remove</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>

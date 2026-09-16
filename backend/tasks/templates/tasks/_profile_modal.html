@@ -1,0 +1,37 @@
+<div class="modal-overlay">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-head">
+      <h3>Profile{% if current_person.role == "admin" %} <span class="role-badge">Admin</span>{% endif %}</h3>
+      <button type="button" class="modal-close" data-modal-close aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <form method="post" action="{% url 'profile' %}"
+          hx-post="{% url 'profile' %}" hx-target="#modal-root" hx-swap="innerHTML">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <div class="field">
+        <label for="{{ form.full_name.id_for_label }}">Your name</label>
+        {{ form.full_name }}
+      </div>
+      <div class="modal-footer" style="border-top:none;margin-top:8px;padding-top:0;">
+        <span></span>
+        <div class="footer-actions">
+          <button type="button" class="btn-secondary" data-modal-close>Cancel</button>
+          <button type="submit" class="btn-primary">Save changes</button>
+        </div>
+      </div>
+    </form>
+
+    <div class="profile-divider"></div>
+
+    <form action="{% url 'logout' %}" method="post" style="margin:0;">
+      {% csrf_token %}
+      <button class="btn-danger-text" type="submit" style="width:100%;justify-content:center;">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Log out
+      </button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,9 @@
+{% if specific_tasks or general_tasks %}
+{% include "tasks/_task_cards.html" with tasks=specific_tasks %}
+{% if general_tasks %}
+<div class="section-divider">General tasks (recurring, no deadline)</div>
+{% include "tasks/_task_cards.html" with tasks=general_tasks %}
+{% endif %}
+{% else %}
+<div class="empty-state"><div class="es-title">No tasks match these filters</div>Try clearing a filter or the search box.</div>
+{% endif %}

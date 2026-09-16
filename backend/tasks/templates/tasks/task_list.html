@@ -1,0 +1,61 @@
+{% extends "tasks/base.html" %}
+{% block title %}All Tasks — Task Panel{% endblock %}
+{% block page_title %}{% if selected_person %}{{ selected_person }}’s tasks{% else %}All tasks{% endif %}{% endblock %}
+{% block page_subtitle %}{% if selected_person %}Everything currently assigned to {{ selected_person }}{% else %}Every task across the team, in one list{% endif %}{% endblock %}
+{% block content %}
+
+<form class="filter-bar" id="filter-bar" hx-get="{% url 'task_list' %}" hx-target="#task-table" hx-trigger="change" hx-push-url="true">
+  <input type="hidden" name="person" value="{{ person }}">
+  <input type="hidden" name="status" value="{{ status }}">
+  <input type="hidden" name="priority" value="{{ priority }}">
+  <input type="hidden" name="type" value="{{ type }}">
+  <input type="hidden" name="q" value="{{ query }}">
+
+  <div class="chip-group">
+    <button type="button" class="chip {% if not status %}active{% endif %}" data-set="status" data-value="">All</button>
+    {% for value, label in status_choices %}
+    <button type="button" class="chip {% if status == value %}active{% endif %}" data-set="status" data-value="{{ value }}">{{ label }}</button>
+    {% endfor %}
+  </div>
+  <div class="filter-divider"></div>
+  <div class="chip-group">
+    <button type="button" class="chip {% if not priority %}active{% endif %}" data-set="priority" data-value="">All</button>
+    {% for value, label in priority_choices %}
+    <button type="button" class="chip {% if priority == value %}active{% endif %}" data-set="priority" data-value="{{ value }}">{{ label }}</button>
+    {% endfor %}
+  </div>
+  <div class="filter-divider"></div>
+  <div class="chip-group">
+    <button type="button" class="chip {% if not type %}active{% endif %}" data-set="type" data-value="">All</button>
+    {% for value, label in type_choices %}
+    <button type="button" class="chip {% if type == value %}active{% endif %}" data-set="type" data-value="{{ value }}">{{ label }}</button>
+    {% endfor %}
+  </div>
+
+  <div class="topbar-spacer"></div>
+  <select class="sort-select" name="sort">
+    <option value="deadline" {% if sort == "deadline" %}selected{% endif %}>Sort by deadline</option>
+    <option value="priority" {% if sort == "priority" %}selected{% endif %}>Sort by priority</option>
+    <option value="progress" {% if sort == "progress" %}selected{% endif %}>Sort by progress</option>
+  </select>
+</form>
+
+<div id="task-table">
+  {% include "tasks/_task_table.html" %}
+</div>
+
+<script>
+document.querySelectorAll('#filter-bar [data-set]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var group = btn.closest('.chip-group');
+    var name = btn.getAttribute('data-set');
+    var value = btn.getAttribute('data-value');
+    var hidden = document.querySelector('#filter-bar input[name="' + name + '"]');
+    hidden.value = value;
+    group.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('active'); });
+    btn.classList.add('active');
+    hidden.dispatchEvent(new Event('change', {bubbles:true}));
+  });
+});
+</script>
+{% endblock %}

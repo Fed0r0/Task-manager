@@ -1,0 +1,72 @@
+{% load task_extras %}
+{% with card_next=next|default:request.get_full_path working=t.active_workers.all %}
+<div class="task-card {% if t.is_overdue %}overdue{% endif %} {% if working and t.status != 'completed' %}working{% endif %}"
+     id="task-card-{{ t.id }}"
+     style="border-left-color:{% if t.is_overdue %}var(--pri-high){% else %}{{ t.priority|priority_color }}{% endif %}; --flash-color:{{ t.priority|priority_color }};">
+  <div class="task-card-body">
+    <button type="button" class="work-toggle-big {% if current_person and current_person in working %}active{% endif %}"
+            title="{% if current_person and current_person in working %}Stop working on this{% else %}Start working on this{% endif %}"
+            hx-post="{% url 'toggle_working' t.id %}?next={{ card_next|urlencode }}"
+            hx-target="#task-card-{{ t.id }}" hx-swap="outerHTML">
+      {% if current_person and current_person in working %}
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+      {% else %}
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+      {% endif %}
+    </button>
+
+    <div class="task-card-row">
+      <div class="task-main">
+        <div class="t-title-row">
+          <span class="priority-box" style="border-color:{{ t.priority|priority_color }};color:{{ t.priority|priority_color }};">{{ t.get_priority_display }}</span>
+          <span class="t-title">{{ t.title }}</span>
+        </div>
+        <div class="t-meta-row">
+          <span class="badge" style="background:color-mix(in srgb, {{ t.type|type_color }} 16%, var(--surface));color:{{ t.type|type_color }}">{{ t.get_type_display }}</span>
+          <span class="badge" style="background:color-mix(in srgb, {{ t.due_status.color }} 16%, var(--surface));color:{{ t.due_status.color }}"><span class="badge-dot" style="background:{{ t.due_status.color }}"></span>{{ t.due_status.label }}</span>
+        </div>
+      </div>
+
+      <div class="t-dates">
+        <div class="row"><span>Start</span><span>{{ t.start_date|date:"M j, Y"|default:"—" }}</span></div>
+        <div class="row"><span>Due</span><span class="{% if t.is_overdue %}overdue-tag{% endif %}">{{ t.deadline|date:"M j, Y"|default:"—" }}{% if t.is_overdue %} &middot; overdue{% endif %}</span></div>
+      </div>
+
+      <div class="t-assign">
+        <div>Assigned by</div>
+        <div class="who">{{ t.assigned_by|default:"—" }}</div>
+      </div>
+
+      <div class="t-assign">
+        <div>Assigned to</div>
+        {% with assignees=t.assigned_to.all %}
+        {% if assignees|length > 1 %}
+        <div class="who">{% if working %}<span class="work-dot"></span>{% endif %}{{ assignees|length }} people</div>
+        {% else %}
+        <div class="who">{% if assignees.0 in working %}<span class="work-dot"></span>{% endif %}{{ assignees.0|default:"—" }}</div>
+        {% endif %}
+        {% endwith %}
+      </div>
+
+      <div class="t-actions">
+        <button type="button" class="icon-btn" title="Edit"
+                hx-get="{% url 'task_edit' t.id %}?next={{ card_next|urlencode }}"
+                hx-target="#modal-root" hx-swap="innerHTML">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <button type="button" class="icon-btn danger" title="Delete"
+                hx-get="{% url 'task_delete' t.id %}?next={{ card_next|urlencode }}"
+                hx-target="#modal-root" hx-swap="innerHTML">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  {% if t.type != 'general' and t.checklist_items.all %}
+  <div class="progress-side" title="{{ t.progress }}% complete">
+    <div class="progress-side-fill" style="height:{{ t.progress }}%;background-color:{{ t.progress|progress_color }};"></div>
+  </div>
+  {% endif %}
+</div>
+{% endwith %}

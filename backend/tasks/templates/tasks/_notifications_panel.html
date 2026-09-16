@@ -1,0 +1,13 @@
+<div class="notif-head">Notifications</div>
+<div id="notif-list">
+  {% for n in notifications %}
+  <div class="notif-item {% if not n.read %}unread{% endif %}" data-notif-item
+       hx-get="{% url 'notification_open' n.id %}?next={{ request.get_full_path|urlencode }}"
+       hx-target="#modal-root" hx-swap="innerHTML">
+    <div>{{ n.comment.author|default:"Someone" }} mentioned you in {% if n.comment.parent_id %}a reply{% else %}a comment{% endif %}: "{{ n.comment.text|truncatechars:80 }}"</div>
+    <div class="t">on "{{ n.comment.task.title }}" &middot; {{ n.created_at|date:"M j, Y H:i" }}</div>
+  </div>
+  {% empty %}
+  <div class="notif-empty">No notifications yet.</div>
+  {% endfor %}
+</div>

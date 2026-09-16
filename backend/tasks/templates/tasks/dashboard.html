@@ -1,0 +1,84 @@
+{% extends "tasks/base.html" %}
+{% block title %}Dashboard — Task Panel{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}An overview of where every task stands{% endblock %}
+{% block content %}
+
+<div class="hero-grid">
+  <div class="hero-card">
+    <div class="ring-wrap">
+      <svg viewBox="0 0 120 120">
+        <g transform="rotate(-90 60 60)">
+          <circle cx="60" cy="60" r="46" fill="none" stroke="var(--ring-track-a)" stroke-width="16"></circle>
+          <circle cx="60" cy="60" r="46" fill="none" stroke="var(--ring-a)" stroke-width="16"
+            stroke-linecap="round"
+            stroke-dasharray="{{ ring_circumference|floatformat:2 }}"
+            stroke-dashoffset="{{ ring_offset|floatformat:2 }}"></circle>
+        </g>
+      </svg>
+      <div class="ring-label">
+        <div class="ring-num">{{ completion_pct }}%</div>
+        <div class="ring-tag">complete</div>
+      </div>
+    </div>
+    <div class="hero-text">
+      <div class="hero-kicker">Team completion</div>
+      <div class="hero-title">{{ completed }} of {{ total }} task{{ total|pluralize }} finished</div>
+    </div>
+  </div>
+  <div class="stat-row">
+    <div class="stat-tile"><div class="num">{{ total }}</div><div class="label">Total tasks</div></div>
+    <div class="stat-tile"><div class="num">{{ in_progress }}</div><div class="label">In progress</div></div>
+    <div class="stat-tile {% if overdue %}warn{% endif %}"><div class="num">{{ overdue }}</div><div class="label">Overdue</div></div>
+  </div>
+</div>
+
+<div class="section-heading">
+  <h2>By team member</h2>
+  <span class="hint">Status and priority split per person</span>
+</div>
+<div class="people-grid">
+  {% for s in people_stats %}
+  <div class="person-card">
+    <div class="person-card-head">
+      <div class="avatar" style="background:{{ s.color }}">{{ s.person.initial }}</div>
+      <div class="pname">{{ s.person }}</div>
+      <div class="ptotal">{{ s.count }} task{{ s.count|pluralize }}</div>
+    </div>
+
+    {% if s.count %}
+    <div class="breakdown-label">Status</div>
+    <div class="stack-bar">
+      {% for label, count, color in s.status_counts %}{% if count %}<div class="stack-seg" style="width:{% widthratio count s.count 100 %}%;background:{{ color }}"></div>{% endif %}{% endfor %}
+    </div>
+    <div class="legend-row">
+      {% for label, count, color in s.status_counts %}{% if count %}<span class="legend-item"><span class="legend-dot" style="background:{{ color }}"></span>{{ label }} ({{ count }})</span>{% endif %}{% endfor %}
+    </div>
+
+    <div class="breakdown-label">Priority</div>
+    <div class="stack-bar">
+      {% for label, count, color in s.priority_counts %}{% if count %}<div class="stack-seg" style="width:{% widthratio count s.count 100 %}%;background:{{ color }}"></div>{% endif %}{% endfor %}
+    </div>
+    <div class="legend-row">
+      {% for label, count, color in s.priority_counts %}{% if count %}<span class="legend-item"><span class="legend-dot" style="background:{{ color }}"></span>{{ label }} ({{ count }})</span>{% endif %}{% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-note">No tasks assigned yet.</div>
+    {% endif %}
+  </div>
+  {% empty %}
+  <div class="empty-state"><div class="es-title">No team members yet</div>Add people in the <a href="{% url 'admin:index' %}">admin</a>.</div>
+  {% endfor %}
+</div>
+
+<div class="section-heading">
+  <h2>Due soon</h2>
+  <span class="hint">Open tasks sorted by deadline</span>
+</div>
+{% if due_soon %}
+{% include "tasks/_task_cards.html" with tasks=due_soon %}
+{% else %}
+<div class="empty-state"><div class="es-title">Nothing on the horizon</div>All open tasks are wrapped up.</div>
+{% endif %}
+
+{% endblock %}

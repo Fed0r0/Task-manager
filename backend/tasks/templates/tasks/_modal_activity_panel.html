@@ -1,0 +1,51 @@
+{% load task_extras %}
+<script type="application/json" id="mention-targets-data">{{ mention_names_json|safe }}</script>
+
+<div class="comments-list">
+  {% for c in task.comments.all %}
+  {% if not c.parent_id %}
+  {% if not c.internal or is_admin %}
+  <div class="comment-row {% if c.internal %}internal{% endif %}">
+    <div class="comment-head">
+      <strong>{{ c.author|default:"—" }}</strong>
+      <span class="comment-date">{{ c.created_at|date:"M j, Y H:i" }}</span>
+      {% if c.internal %}<span class="badge" style="background:var(--surface-alt);color:var(--ink-muted);">Internal</span>{% endif %}
+    </div>
+    <div class="comment-text">{{ c.text|mentionify }}</div>
+    <button type="button" class="link-btn" data-reply-for="{{ c.id }}">Reply</button>
+
+    {% with replies=c.replies.all %}
+    {% if replies %}
+    <div class="reply-list">
+      {% for r in replies %}
+      <div class="comment-reply">
+        <div class="comment-head"><strong>{{ r.author|default:"—" }}</strong><span class="comment-date">{{ r.created_at|date:"M j, Y H:i" }}</span></div>
+        <div class="comment-text">{{ r.text|mentionify }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <form class="reply-form hidden" data-reply-form="{{ c.id }}"
+          hx-post="{% url 'comment_reply_add' task.id c.id %}" hx-target="#activity-panel" hx-swap="innerHTML">
+      <textarea name="text" rows="2" placeholder="Write a reply..."></textarea>
+      <button type="submit" class="btn-secondary">Send reply</button>
+    </form>
+  </div>
+  {% endif %}
+  {% endif %}
+  {% empty %}
+  <div class="empty-note">No comments yet. Start the conversation below.</div>
+  {% endfor %}
+</div>
+
+<form class="comment-form" hx-post="{% url 'comment_add' task.id %}" hx-target="#activity-panel" hx-swap="innerHTML">
+  {{ comment_form.text }}
+  {% if is_admin %}
+  <label class="toggle-row">
+    <input type="checkbox" name="internal"> Internal note (visible to admins only)
+  </label>
+  {% endif %}
+  <button type="submit" class="btn-primary">Post</button>
+</form>

@@ -1,0 +1,133 @@
+{% load task_extras %}
+<div class="modal-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>{% if task %}Edit task{% else %}Add task{% endif %}</h3>
+      <button type="button" class="modal-close" data-modal-close aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-tabs">
+      <button type="button" class="modal-tab {% if initial_tab == "details" or not task %}active{% endif %}" data-tab="details">Details</button>
+      {% if task %}
+      <button type="button" class="modal-tab {% if initial_tab == "checklist" %}active{% endif %}" data-tab="checklist">Checklist</button>
+      <button type="button" class="modal-tab {% if initial_tab == "attachments" %}active{% endif %}" data-tab="attachments">Attachments</button>
+      <button type="button" class="modal-tab {% if initial_tab == "activity" %}active{% endif %}" data-tab="activity">Activity</button>
+      <button type="button" class="modal-tab {% if initial_tab == "history" %}active{% endif %}" data-tab="history">History</button>
+      {% endif %}
+    </div>
+
+    <div class="modal-tab-panel {% if initial_tab == "details" or not task %}active{% endif %}" data-panel="details">
+      <form method="post" action="{% if task %}{% url 'task_edit' task.id %}{% else %}{% url 'task_new' %}{% endif %}"
+            hx-post="{% if task %}{% url 'task_edit' task.id %}{% else %}{% url 'task_new' %}{% endif %}"
+            hx-target="#modal-root" hx-swap="innerHTML">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        <div class="form-grid">
+          <div class="field span-2">
+            <label for="{{ form.title.id_for_label }}">Task title</label>
+            {{ form.title }}
+          </div>
+
+          <div class="field span-2">
+            <label>Task type</label>
+            <div class="chip-group" id="type-chip-group">
+              {% for radio in form.type %}
+              <label class="chip">{{ radio.tag }}{{ radio.choice_label }}</label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="field span-2">
+            <label for="{{ form.description.id_for_label }}">Description</label>
+            {{ form.description }}
+          </div>
+
+          <div class="field span-2">
+            <label>Assigned to</label>
+            <div class="chip-group">
+              {% for checkbox in form.assigned_to %}
+              <label class="chip">{{ checkbox.tag }}{{ checkbox.choice_label }}</label>
+              {% empty %}
+              <span class="empty-note">No team members yet.</span>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="{{ form.priority.id_for_label }}">Priority</label>
+            {{ form.priority }}
+          </div>
+          <div class="field">
+            <label for="{{ form.status.id_for_label }}">Status</label>
+            {{ form.status }}
+          </div>
+
+          <div class="field" data-date-field {% if task.type == "general" %}style="display:none;"{% endif %}>
+            <label for="{{ form.start_date.id_for_label }}">Start date</label>
+            {{ form.start_date }}
+          </div>
+          <div class="field" data-date-field {% if task.type == "general" %}style="display:none;"{% endif %}>
+            <label for="{{ form.deadline.id_for_label }}">Deadline</label>
+            {{ form.deadline }}
+          </div>
+
+          {% if task and task.type != "general" and task.checklist_items.all %}
+          <div class="field span-2">
+            <label>Progress</label>
+            <div class="progress-track"><div class="progress-fill" style="width:{{ task.progress }}%;background:{{ task.progress|progress_color }};"></div></div>
+            <div class="progress-auto-note">{{ task.progress }}% — calculated automatically from the checklist.</div>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="modal-footer">
+          {% if task %}
+          <button type="button" class="btn-danger-text" hx-get="{% url 'task_delete' task.id %}?next={{ next|urlencode }}" hx-target="#modal-root" hx-swap="innerHTML">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            Delete task
+          </button>
+          {% else %}<span></span>{% endif %}
+          <div class="footer-actions">
+            <button type="button" class="btn-secondary" data-modal-close>Cancel</button>
+            <button type="submit" class="btn-primary">Save task</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    {% if task %}
+    <div class="modal-tab-panel {% if initial_tab == "checklist" %}active{% endif %}" data-panel="checklist">
+      <div id="checklist-panel">
+        {% include "tasks/_modal_checklist_panel.html" %}
+      </div>
+    </div>
+
+    <div class="modal-tab-panel {% if initial_tab == "attachments" %}active{% endif %}" data-panel="attachments">
+      <div id="attachments-panel">
+        {% include "tasks/_modal_attachments_panel.html" %}
+      </div>
+    </div>
+
+    <div class="modal-tab-panel {% if initial_tab == "activity" %}active{% endif %}" data-panel="activity">
+      <div id="activity-panel">
+        {% include "tasks/_modal_activity_panel.html" %}
+      </div>
+    </div>
+
+    <div class="modal-tab-panel {% if initial_tab == "history" %}active{% endif %}" data-panel="history">
+      <div class="history-list">
+        {% for h in history_entries %}
+        <div class="history-row">
+          <span class="history-date">{{ h.at|date:"d M Y" }}</span>
+          <span> — <strong>{{ h.user|default:"—" }}</strong> {{ h.action }}</span>
+        </div>
+        {% empty %}
+        <div class="empty-note">No history yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
