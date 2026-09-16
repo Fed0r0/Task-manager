@@ -12,38 +12,41 @@ A team task tracker: tasks with checklists, attachments, comments with @mentions
 
 ## Installation
 
-Requires [Docker](https://www.docker.com/) with Docker Compose.
+Requires [Docker](https://www.docker.com/) with Docker Compose. No Python/pip setup needed on your machine either way — everything runs inside containers.
+
+### Recommended: load the pre-built images (no network calls for dependencies at all)
+
+Use this if you were handed an image bundle (`taskpanel-all-images.tar.gz`) alongside this repo — it contains both the `web` app image and the exact `postgres:16` image already built, so **nothing gets downloaded or compiled on your machine**, sidestepping any corporate proxy/antivirus HTTPS interception issues entirely.
 
 1. Clone the repository and enter it:
    ```bash
    git clone <repo-url>
    cd Task_manager
    ```
-2. Build and start the containers — no configuration needed, the repo already includes a working `.env`:
+2. Load the images from the bundle you were given (adjust the path to wherever you saved it):
    ```bash
-   docker compose up -d --build
+   docker load -i taskpanel-all-images.tar.gz
    ```
-   This automatically runs database migrations on startup. On a **fresh, empty database**, one of those migrations also seeds two demo accounts with sample tasks, so there's something to look at immediately:
+3. Start the containers — **no `--build`**, the images already exist locally:
+   ```bash
+   docker compose up -d
+   ```
+4. Open [http://localhost:8000](http://localhost:8000) and sign in with one of the seeded demo accounts (or your own, once created via the admin's **Add person** button):
 
    | Username | Password | Role |
    |---|---|---|
    | `jblake` | `Harbor42Kite` | Admin |
    | `mchen` | `Violet9Stream` | Member |
 
-   This seeding only happens once, on an empty database — it never touches or resets real data added afterwards.
+   These are created automatically on first startup by a migration that seeds sample tasks on a fresh, empty database — it never touches or resets real data added afterwards.
 
-3. Open [http://localhost:8000](http://localhost:8000) and sign in with one of the accounts above (or your own, once created via the admin's **Add person** button).
+### Alternative: build from source
 
-### If step 2 fails with `CERTIFICATE_VERIFY_FAILED`
-
-That means something on your machine (a corporate proxy or antivirus with HTTPS inspection) is intercepting the connection `pip` makes to PyPI while building the image — `pip` doesn't trust that interception certificate, even if the rest of your system does. This isn't something fixable inside the image.
-
-The fix that doesn't require you to touch any certificates: load the pre-built image you were given instead of building it locally, then start the containers **without** `--build`:
+If you weren't given an image bundle, or want to build from the current source instead:
 ```bash
-docker load -i taskpanel-web-image.tar.gz
-docker compose up -d
+docker compose up -d --build
 ```
-`docker load` and `docker compose up` don't talk to PyPI at all, so the same interception that breaks `pip` doesn't affect this path.
+This downloads the Python base image and installs dependencies via `pip`. If it fails with `CERTIFICATE_VERIFY_FAILED`, that means something on your machine (a corporate proxy or antivirus with HTTPS inspection) is intercepting the connection to PyPI — `pip` doesn't trust that interception certificate even if the rest of your system does, and it's not fixable from inside the image. Use the pre-built image bundle above instead — it needs no PyPI or Docker Hub access at all.
 
 ### Useful commands
 
