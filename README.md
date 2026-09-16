@@ -19,8 +19,7 @@ Requires [Docker](https://www.docker.com/) with Docker Compose.
    git clone <repo-url>
    cd Task_manager
    ```
-2. Add the `.env` file to the project root (get it from whoever shared this repo with you — it's not committed to git on purpose, since it holds real secrets/passwords).
-3. Build and start the containers:
+2. Build and start the containers — no configuration needed, the repo already includes a working `.env`:
    ```bash
    docker compose up -d --build
    ```
@@ -33,7 +32,7 @@ Requires [Docker](https://www.docker.com/) with Docker Compose.
 
    This seeding only happens once, on an empty database — it never touches or resets real data added afterwards.
 
-4. Open [http://localhost:8000](http://localhost:8000) and sign in with one of the accounts above (or your own, once created via the admin's **Add person** button).
+3. Open [http://localhost:8000](http://localhost:8000) and sign in with one of the accounts above (or your own, once created via the admin's **Add person** button).
 
 ### Useful commands
 
