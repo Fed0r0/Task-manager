@@ -18,6 +18,7 @@ services:
       retries: 10
 
   web:
+    image: taskpanel-web:latest
     build: ./backend
     restart: unless-stopped
     env_file: .env

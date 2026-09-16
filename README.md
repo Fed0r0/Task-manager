@@ -34,6 +34,17 @@ Requires [Docker](https://www.docker.com/) with Docker Compose.
 
 3. Open [http://localhost:8000](http://localhost:8000) and sign in with one of the accounts above (or your own, once created via the admin's **Add person** button).
 
+### If step 2 fails with `CERTIFICATE_VERIFY_FAILED`
+
+That means something on your machine (a corporate proxy or antivirus with HTTPS inspection) is intercepting the connection `pip` makes to PyPI while building the image — `pip` doesn't trust that interception certificate, even if the rest of your system does. This isn't something fixable inside the image.
+
+The fix that doesn't require you to touch any certificates: load the pre-built image you were given instead of building it locally, then start the containers **without** `--build`:
+```bash
+docker load -i taskpanel-web-image.tar.gz
+docker compose up -d
+```
+`docker load` and `docker compose up` don't talk to PyPI at all, so the same interception that breaks `pip` doesn't affect this path.
+
 ### Useful commands
 
 ```bash
