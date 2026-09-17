@@ -56,3 +56,24 @@ docker compose exec web python manage.py createsuperuser   # create an extra Dja
 docker compose down              # stop the containers (keeps data)
 docker compose down -v           # stop and wipe the database completely
 ```
+
+## Inspecting the database
+
+Credentials are the `POSTGRES_*` values in your `.env` file (`taskpanel` / `change-me` by default — check your actual `.env`, it may have been regenerated).
+
+**Option A — psql inside the container, no extra tooling needed:**
+```bash
+docker compose exec db psql -U taskpanel -d taskpanel
+```
+
+**Option B — any external client (DBeaver, TablePlus, pgAdmin, etc.):**
+The `db` service publishes its port to the host, so connect to:
+- Host: `localhost`
+- Port: `5432`
+- Database / User / Password: the `POSTGRES_DB` / `POSTGRES_USER` / `POSTGRES_PASSWORD` values from `.env`
+
+**Option C — Django admin (read/write UI, no SQL):**
+```bash
+docker compose exec web python manage.py createsuperuser
+```
+Then open [http://localhost:8000/admin](http://localhost:8000/admin) and log in with that account.
