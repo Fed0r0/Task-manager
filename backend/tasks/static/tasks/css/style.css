@@ -496,6 +496,7 @@ a{color:inherit;text-decoration:none;}
 }
 .task-card:hover{border-color:var(--border-strong);}
 .task-card.overdue{border-left-color:var(--pri-high);}
+.task-card.completed{border-color:var(--st-completed);border-width:2px 2px 2px 3px;}
 
 /* ---------- "working now" indicator ---------- */
 @keyframes workPulse{

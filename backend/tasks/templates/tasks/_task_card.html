@@ -1,8 +1,8 @@
 {% load task_extras %}
 {% with card_next=next|default:request.get_full_path working=t.active_workers.all assignees=t.assigned_to.all %}
-<div class="task-card {% if t.is_overdue %}overdue{% endif %} {% if working and t.status != 'completed' %}working{% endif %}"
+<div class="task-card {% if t.status == 'completed' %}completed{% endif %} {% if t.is_overdue %}overdue{% endif %} {% if working and t.status != 'completed' %}working{% endif %}"
      id="task-card-{{ t.id }}"
-     style="border-left-color:{% if t.is_overdue %}var(--pri-high){% else %}{{ t.priority|priority_color }}{% endif %}; --flash-color:{{ t.priority|priority_color }};">
+     style="{% if t.status != 'completed' %}border-left-color:{% if t.is_overdue %}var(--pri-high){% else %}{{ t.priority|priority_color }}{% endif %};{% endif %} --flash-color:{{ t.priority|priority_color }};">
   <div class="task-card-body">
     {% if current_person and current_person in assignees %}
     <button type="button" class="work-toggle-big {% if current_person in working %}active{% endif %}"
