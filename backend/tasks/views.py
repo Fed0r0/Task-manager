@@ -39,6 +39,19 @@ def _log_history(task, person, action):
     HistoryEntry.objects.create(task=task, user=person, action=action)
 
 
+def _sync_status_from_checklist(task, person):
+    """Auto-complete a specific task once its checklist reaches 100% progress,
+    mirroring the prototype's recalcProgressFromChecklist behavior."""
+    if task.type == "general" or task.status == "completed":
+        return
+    if not task.checklist_items.exists():
+        return
+    if task.progress == 100:
+        task.status = "completed"
+        task.save(update_fields=["status", "updated_at"])
+        _log_history(task, person, "completed task (all checklist items done)")
+
+
 def _safe_next(request, default="task_list"):
     candidate = request.POST.get("next") or request.GET.get("next")
     if candidate and url_has_allowed_host_and_scheme(candidate, allowed_hosts={request.get_host()}):
@@ -441,6 +454,7 @@ def checklist_add(request, task_id):
             order = task.checklist_items.count()
             item = ChecklistItem.objects.create(task=task, text=form.cleaned_data["text"].strip(), order=order)
             _log_history(task, _current_person(request), f'added checklist item "{item.text}"')
+            _sync_status_from_checklist(task, _current_person(request))
     return _checklist_panel_response(request, task)
 
 
@@ -453,6 +467,7 @@ def checklist_toggle(request, task_id, item_id):
         item.save()
         verb = "checked" if item.done else "unchecked"
         _log_history(task, _current_person(request), f'{verb} checklist item "{item.text}"')
+        _sync_status_from_checklist(task, _current_person(request))
     return _checklist_panel_response(request, task)
 
 
@@ -464,6 +479,7 @@ def checklist_delete(request, task_id, item_id):
         text = item.text
         item.delete()
         _log_history(task, _current_person(request), f'removed checklist item "{text}"')
+        _sync_status_from_checklist(task, _current_person(request))
     return _checklist_panel_response(request, task)
 
 
