@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
+from django.utils import timezone
 
 from .models import ChecklistItem, Comment, Person, Task
 
@@ -75,9 +76,12 @@ class TaskForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["assigned_to"].queryset = Person.objects.select_related("user")
-        self.fields["assigned_to"].required = False
+        self.fields["assigned_to"].required = True
+        self.fields["assigned_to"].error_messages["required"] = "Assign at least one person to this task."
         self.fields["start_date"].required = False
         self.fields["deadline"].required = False
+        if self.instance.pk is None and not self.is_bound:
+            self.fields["start_date"].initial = timezone.localdate()
 
 
 class ChecklistItemForm(forms.ModelForm):

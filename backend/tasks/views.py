@@ -411,6 +411,8 @@ def toggle_working(request, task_id):
     person = _current_person(request)
 
     if request.method == "POST" and person:
+        if not task.assigned_to.filter(pk=person.pk).exists():
+            raise PermissionDenied("You can only start working on tasks assigned to you.")
         if task.active_workers.filter(pk=person.pk).exists():
             task.active_workers.remove(person)
             _log_history(task, person, "stopped working on this task")

@@ -46,13 +46,26 @@
 
           <div class="field span-2">
             <label>Assigned to</label>
-            <div class="chip-group">
-              {% for checkbox in form.assigned_to %}
-              <label class="chip">{{ checkbox.tag }}{{ checkbox.choice_label }}</label>
-              {% empty %}
-              <span class="empty-note">No team members yet.</span>
-              {% endfor %}
+            {% if form.assigned_to %}
+            <div class="people-select">
+              <button type="button" class="people-select-trigger">
+                <span class="people-select-trigger-text">Select people</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="people-select-panel">
+                {% for checkbox in form.assigned_to %}
+                <label class="people-select-row">
+                  {{ checkbox.tag }}
+                  <span class="people-select-dot" style="background:{{ forloop.counter0|person_color }}"></span>
+                  <span class="people-select-name">{{ checkbox.choice_label }}</span>
+                </label>
+                {% endfor %}
+              </div>
             </div>
+            {% else %}
+            <span class="empty-note">No team members yet.</span>
+            {% endif %}
+            {% if form.assigned_to.errors %}<div class="field-error">{{ form.assigned_to.errors|join:" " }}</div>{% endif %}
           </div>
 
           <div class="field">

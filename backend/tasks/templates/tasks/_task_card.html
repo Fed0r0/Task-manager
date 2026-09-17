@@ -1,19 +1,21 @@
 {% load task_extras %}
-{% with card_next=next|default:request.get_full_path working=t.active_workers.all %}
+{% with card_next=next|default:request.get_full_path working=t.active_workers.all assignees=t.assigned_to.all %}
 <div class="task-card {% if t.is_overdue %}overdue{% endif %} {% if working and t.status != 'completed' %}working{% endif %}"
      id="task-card-{{ t.id }}"
      style="border-left-color:{% if t.is_overdue %}var(--pri-high){% else %}{{ t.priority|priority_color }}{% endif %}; --flash-color:{{ t.priority|priority_color }};">
   <div class="task-card-body">
-    <button type="button" class="work-toggle-big {% if current_person and current_person in working %}active{% endif %}"
-            title="{% if current_person and current_person in working %}Stop working on this{% else %}Start working on this{% endif %}"
+    {% if current_person and current_person in assignees %}
+    <button type="button" class="work-toggle-big {% if current_person in working %}active{% endif %}"
+            title="{% if current_person in working %}Stop working on this{% else %}Start working on this{% endif %}"
             hx-post="{% url 'toggle_working' t.id %}?next={{ card_next|urlencode }}"
             hx-target="#task-card-{{ t.id }}" hx-swap="outerHTML">
-      {% if current_person and current_person in working %}
+      {% if current_person in working %}
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
       {% else %}
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
       {% endif %}
     </button>
+    {% endif %}
 
     <div class="task-card-row">
       <div class="task-main">
@@ -39,13 +41,11 @@
 
       <div class="t-assign">
         <div>Assigned to</div>
-        {% with assignees=t.assigned_to.all %}
         {% if assignees|length > 1 %}
         <div class="who">{% if working %}<span class="work-dot"></span>{% endif %}{{ assignees|length }} people</div>
         {% else %}
         <div class="who">{% if assignees.0 in working %}<span class="work-dot"></span>{% endif %}{{ assignees.0|default:"—" }}</div>
         {% endif %}
-        {% endwith %}
       </div>
 
       <div class="t-actions">

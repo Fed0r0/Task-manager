@@ -158,13 +158,47 @@
     evt.detail.headers['X-CSRFToken'] = getCookie('csrftoken');
   });
 
+  document.body.addEventListener('htmx:afterSwap', function(evt){
+    if(evt.detail.target && evt.detail.target.id === 'modal-root'){
+      evt.detail.target.querySelectorAll('.people-select').forEach(updatePeopleSelectLabel);
+    }
+  });
+
   var modalRoot = document.getElementById('modal-root');
 
   function closeModal(){
     modalRoot.innerHTML = '';
   }
 
+  function updatePeopleSelectLabel(container){
+    var label = container.querySelector('.people-select-trigger-text');
+    var trigger = container.querySelector('.people-select-trigger');
+    if(!label || !trigger) return;
+    var checked = container.querySelectorAll('input:checked');
+    if(!checked.length){
+      label.textContent = 'Select people';
+      trigger.classList.add('placeholder');
+    } else if(checked.length === 1){
+      label.textContent = checked[0].closest('.people-select-row').querySelector('.people-select-name').textContent;
+      trigger.classList.remove('placeholder');
+    } else {
+      label.textContent = checked.length + ' people selected';
+      trigger.classList.remove('placeholder');
+    }
+  }
+
   modalRoot.addEventListener('click', function(e){
+    var peopleTrigger = e.target.closest('.people-select-trigger');
+    if(peopleTrigger){
+      var container = peopleTrigger.closest('.people-select');
+      var wasOpen = container.classList.contains('open');
+      modalRoot.querySelectorAll('.people-select.open').forEach(function(c){ c.classList.remove('open'); });
+      if(!wasOpen) container.classList.add('open');
+      return;
+    }
+    if(!e.target.closest('.people-select')){
+      modalRoot.querySelectorAll('.people-select.open').forEach(function(c){ c.classList.remove('open'); });
+    }
     var tabBtn = e.target.closest('.modal-tab');
     if(tabBtn){
       if(tabBtn.disabled) return;
@@ -195,6 +229,10 @@
   });
 
   modalRoot.addEventListener('change', function(e){
+    if(e.target.name === 'assigned_to'){
+      var peopleContainer = e.target.closest('.people-select');
+      if(peopleContainer) updatePeopleSelectLabel(peopleContainer);
+    }
     if(e.target.name === 'type'){
       var isGeneral = e.target.value === 'general';
       var modal = e.target.closest('.modal');

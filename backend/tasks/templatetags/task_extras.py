@@ -4,6 +4,8 @@ from django import template
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
+from ..colors import person_color as _person_color
+
 register = template.Library()
 
 MENTION_RE = re.compile(r"@(\w+)")
@@ -23,6 +25,11 @@ TYPE_COLORS = {
 @register.filter
 def priority_color(priority):
     return PRIORITY_COLORS.get(priority, "var(--pri-medium)")
+
+
+@register.filter(name="person_color")
+def person_color_filter(index):
+    return _person_color(index)
 
 
 @register.filter
